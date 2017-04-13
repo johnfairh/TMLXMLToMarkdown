@@ -55,7 +55,7 @@
 		02D9E3D31E9E216D00689CC6 = {
 			isa = PBXGroup;
 			children = (
-				02D9E3DE1E9E216D00689CC6 /* XMLToMarkdown */,
+				02D9E3DE1E9E216D00689CC6 /* Sources */,
 				02D9E3ED1E9E21BF00689CC6 /* XMLToMarkdownTests */,
 				02D9E3DD1E9E216D00689CC6 /* Products */,
 			);
@@ -70,13 +70,13 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		02D9E3DE1E9E216D00689CC6 /* XMLToMarkdown */ = {
+		02D9E3DE1E9E216D00689CC6 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
 				02D9E3DF1E9E216D00689CC6 /* main.swift */,
 				02D9E3E61E9E219A00689CC6 /* XMLToMarkdown.swift */,
 			);
-			path = XMLToMarkdown;
+			path = Sources;
 			sourceTree = "<group>";
 		};
 		02D9E3ED1E9E21BF00689CC6 /* XMLToMarkdownTests */ = {
@@ -85,7 +85,8 @@
 				02D9E3EE1E9E21BF00689CC6 /* XMLToMarkdownTests.swift */,
 				02D9E3F01E9E21BF00689CC6 /* Info.plist */,
 			);
-			path = XMLToMarkdownTests;
+			name = XMLToMarkdownTests;
+			path = Tests/XMLToMarkdownTests;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -352,6 +353,7 @@
 				02D9E3E51E9E216D00689CC6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		02D9E3F11E9E21BF00689CC6 /* Build configuration list for PBXNativeTarget "XMLToMarkdownTests" */ = {
 			isa = XCConfigurationList;
@@ -360,6 +362,7 @@
 				02D9E3F31E9E21BF00689CC6 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};
