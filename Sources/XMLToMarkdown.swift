@@ -57,6 +57,14 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         case rawHTML           = "rawHTML"
     }
 
+    // Stuff that doesn't work in Xcode 8.1 markup although it is documented:
+    // 1. Backslash at end of line causes hard linebreak.
+    // 2. Smart ordered list items, ie. start with '4.' and it follows.
+    //
+    // Stuff hinted at https://github.com/apple/swift/blob/master/include/swift/Markup/ASTNodes.def
+    // that isn't documented:
+    // 1. BlockQuote
+
     /// Accumulated markdown
     private var output = ""
 
@@ -69,23 +77,19 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     /// Are we in a Para?
     private var inPara = false
 
-    /// Current Link href
-    private var inLinkWithHRef: String? = nil
-
     private func reset() {
         output = ""
         indent = .none
         inCodeListing = false
-        inLinkWithHRef = nil
         inPara = false
+        elementDoneStack = []
     }
 
     /// Create a new SourceKit XML converter.
     public override init() {
     }
 
-    /// Convert SourceKit XML to Redcarpet markdown\
-    /// Force linebreak!
+    /// Convert SourceKit XML to Redcarpet markdown
     ///
     /// - Parameter xml: SourceKit XML
     /// - Returns: Markdown version of the XML.  Empty string on any failure.
@@ -105,6 +109,11 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         return output
     }
 
+    /// Stack of work to do as elements close
+    private typealias ElementDone = () -> Void
+    private var elementDoneStack: [ElementDone?] = []
+
+    /// Main formatter - spot interesting tags, do something + schedule more work for when the element ends.
     public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
         // Discussion - nop
         // Para - indent
@@ -121,86 +130,76 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
         guard let element = Element(rawValue: elementName) else {
             // TODO: warning unknown element
+            elementDoneStack.append(nil)
             return
         }
 
+        var elementDone: ElementDone? = nil
+
         switch element {
         case .discussion:
-            // OK
+            // When discussion ends trim off the likely dangling newlines from the last para.
+            elementDone = {
+                self.output = self.output.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
             break
         case .emphasis:
             output += "*"
+            elementDone = { self.output += "*" }
             break
         case .strong:
             output += "**"
+            elementDone = { self.output += "**" }
             break
         case .codeVoice:
             output += "`"
+            elementDone = { self.output += "`" }
             break
         case .para:
             output += indent.prefix()
             inPara = true
+            elementDone = {
+                self.output += "\n\n"
+                self.inPara = false
+            }
             break
         case .codeListing:
             output += indent.prefix() + "```" + (attributeDict["language"] ?? "") + "\n"
             inCodeListing = true
+            elementDone = {
+                self.output += self.indent.prefix() + "```\n\n"
+                self.inCodeListing = false
+            }
             break
         case .zCodeLineNumbered:
             break
         case .link:
             output += "["
-            inLinkWithHRef = attributeDict["href"] ?? ""
+            elementDone = {
+                let href = attributeDict["href"] ?? ""
+                self.output += "](\(href))"
+            }
             break
         case .rawHTML:
-            if !inPara { // this can be both block + inline.  If block then we have to do the indent.
+            // Can be block or inline :(  If block then have to do indent + paragraphing.
+            if !inPara {
                 output += indent.prefix()
+                elementDone = { self.output += "\n\n" }
             }
         }
+
+        elementDoneStack.append(elementDone)
     }
 
+    /// End of element - just process whatever was saved when the element opened.
     public func parser(_ parser: XMLParser, didEndElement elementName: String, namespaceURI: String?, qualifiedName qName: String?) {
-        guard let element = Element(rawValue: elementName) else {
-            // TODO: warning unknown element
-            return
-        }
-
-        switch element {
-        case .discussion:
-            // Done - trim.
-            output = output.trimmingCharacters(in: .whitespacesAndNewlines)
-            break
-        case .emphasis:
-            output += "*"
-            break
-        case .strong:
-            output += "**"
-            break
-        case .codeVoice:
-            output += "`"
-            break
-        case .para:
-            output += "\n\n"
-            inPara = false
-            break
-        case .codeListing:
-            output += indent.prefix() + "```" + "\n\n"
-            inCodeListing = false
-            break
-        case .zCodeLineNumbered:
-            break
-        case .link:
-            output += "](\(inLinkWithHRef!))"
-            inLinkWithHRef = nil
-            break
-        case .rawHTML:
-            if !inPara { // as above, if we are block we have to end the block.
-                output += "\n\n"
-            }
-        }
+        let elementDone = elementDoneStack.removeLast()
+        elementDone?()
     }
     
     /// Text to pass through.
     public func parser(_ parser: XMLParser, foundCharacters string: String) {
+        // TODO: regex help
         let markdownChars = "*+-_`.#"
         output += string.replacingOccurrences(of: "*", with: "\\*")
             .replacingOccurrences(of: "_", with: "\\_")
@@ -227,5 +226,6 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     }
     
     public func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
+        // TODO: report
     }
 }
