@@ -14,26 +14,26 @@ import Foundation
 let xmlToMarkdown = XMLToMarkdown()
 
 if CommandLine.arguments.count > 1 {
-	CommandLine.arguments.suffix(from: 1).forEach { file in
-		guard let data = FileManager.default.contents(atPath: file) else {
-			print("Can't open file \(file)")
-			return
-		}
+    CommandLine.arguments.suffix(from: 1).forEach { file in
+        guard let data = FileManager.default.contents(atPath: file) else {
+            print("Can't open file \(file)")
+            return
+        }
 
-		guard let xml = String(bytes: data, encoding: .utf8) else {
-			print("Can't get contents straight for \(file)")
-			return
-		}
+        guard let xml = String(bytes: data, encoding: .utf8) else {
+            print("Can't get contents straight for \(file)")
+            return
+        }
 
-		let md = xmlToMarkdown.convert(xml: xml)
+        let md = xmlToMarkdown.parseDiscussion(xml: xml)
 
-		print(md)
-	}
+        print(md)
+    }
 } else {
-	var xml = ""
-	while let line = readLine() {
-		xml += line
-	}
-	let md = xmlToMarkdown.convert(xml: xml)
-	print(md)
+    var xml = ""
+    while let line = readLine() {
+        xml += line
+    }
+    let md = xmlToMarkdown.parseDiscussion(xml: xml)
+    print(md)
 }
