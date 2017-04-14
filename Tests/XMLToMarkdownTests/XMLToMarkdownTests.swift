@@ -113,7 +113,85 @@ class XMLToMarkdownTests: XCTestCase {
             "<Link href=\"\(link)\">\(text)</Link>",
             "[\(text)](\(link))")
     }
-    
+
+    func testImageLinkOnly() {
+        let url = "http://example.com/"
+        issueTest(
+            "<rawHTML><![CDATA[<img src=\"\(url)\"/>]]></rawHTML>",
+            "![](\(url))")
+    }
+
+    func testImageLinkAndAltText() {
+        let url = "http://example.com/"
+        let alt = "A nice link"
+        issueTest(
+            "<rawHTML><![CDATA[<img src=\"\(url)\" alt=\"\(alt)\"/>]]></rawHTML>",
+            "![\(alt)](\(url))")
+    }
+
+    func testImageLinkAndTitle() {
+        let url = "http://example.com/"
+        let title = "Hovertext"
+        issueTest(
+            "<rawHTML><![CDATA[<img src=\"\(url)\" title=\"\(title)\"/>]]></rawHTML>",
+            "![](\(url) \"\(title)\")")
+    }
+
+    func testImageLinkAltTextAndTitle() {
+        let url = "http://example.com/"
+        let alt = "A nice link"
+        let title = "Hovertext"
+        issueTest(
+            "<rawHTML><![CDATA[<img src=\"\(url)\" title=\"\(title)\" alt=\"\(alt)\"/>]]></rawHTML>",
+            "![\(alt)](\(url) \"\(title)\")")
+    }
+
+    func testHorzRule() {
+        issueTest(
+            "<rawHTML><![CDATA[<hr/>]]></rawHTML>",
+            "---")
+    }
+
+    func testSimpleHeadings() {
+        let heading = "Heading Title"
+
+        issueTest(
+            "<rawHTML><![CDATA[<h1>]]></rawHTML>\(heading)<rawHTML><![CDATA[</h1>]]></rawHTML>",
+            "# \(heading)")
+
+        issueTest(
+            "<rawHTML><![CDATA[<h2>]]></rawHTML>\(heading)<rawHTML><![CDATA[</h2>]]></rawHTML>",
+            "## \(heading)")
+
+        issueTest(
+            "<rawHTML><![CDATA[<h3>]]></rawHTML>\(heading)<rawHTML><![CDATA[</h3>]]></rawHTML>",
+            "### \(heading)")
+
+        issueTest(
+            "<rawHTML><![CDATA[<h4>]]></rawHTML>\(heading)<rawHTML><![CDATA[</h4>]]></rawHTML>",
+            "#### \(heading)")
+
+        issueTest(
+            "<rawHTML><![CDATA[<h5>]]></rawHTML>\(heading)<rawHTML><![CDATA[</h5>]]></rawHTML>",
+            "##### \(heading)")
+    }
+
+    func testHeadingAndText() {
+        let heading = "Heading text"
+        let para1 = "Para 1 text"
+        let para2 = "Para 2 text"
+
+        issueTest(
+            "<Para>\(para1)</Para>" +
+            "<rawHTML><![CDATA[<h2>]]></rawHTML>\(heading)<rawHTML><![CDATA[</h2>]]></rawHTML>" +
+            "<Para>\(para2)</Para>",
+            "\(para1)\n" +
+            "\n" +
+            "## \(heading)\n" +
+            "\n" +
+            "\(para2)")
+    }
+
     func testSimpleBullets() { // custom list numbering, change lists on bullet type
         XCTFail()
     }
@@ -133,6 +211,4 @@ class XMLToMarkdownTests: XCTestCase {
     func testUnknownElement() {
         XCTFail()
     }
-    
-    // blockquote, header, hrule, escape of emph chars in straight text
 }
