@@ -238,13 +238,16 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         elementDone?()
     }
     
-    /// Text to pass through.
+    /// Text to pass through.  Stop redcarpet from interpreting any stuff as markdown formatting.
+    static let markdownCharsRegex: NSRegularExpression = {
+        let markdownChars = "-_*+`.#"
+        let escapedChars = NSRegularExpression.escapedPattern(for: markdownChars)
+        return try! NSRegularExpression(pattern: "[\(escapedChars)]")
+    }()
+
     public func parser(_ parser: XMLParser, foundCharacters string: String) {
-        // TODO: regex help
-        let markdownChars = "*+-_`.#"
-        output += string.replacingOccurrences(of: "*", with: "\\*")
-            .replacingOccurrences(of: "_", with: "\\_")
-            .replacingOccurrences(of: "`", with: "\\`")
+        let regex = XMLToMarkdown.markdownCharsRegex
+        output += regex.stringByReplacingMatches(in: string, range: string.nsRange, withTemplate: "\\\\$0")
     }
 
     /// CDATA.  Used for html, stuff that looks like html, each line of a code block.
@@ -268,7 +271,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         }
     }
 
-    /// Painful <img> roundtripping.  Relies on Xcode's attrib ordering.
+    /// Painful <img> roundtripping.  Relies on SourceKit's attrib ordering.
     static let imgTagRegex: NSRegularExpression =
         try! NSRegularExpression(pattern: "<img src=\"(.*?)\"(?: title=\"(.*?)\")?(?: alt=\"(.*?)\")?/>")
 
@@ -307,8 +310,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             return ""
         } else if let level = Int(matchedStrings[2]!) {
             // need to NOT have a newline after this html...
-            elementDoneStack.removeLast()
-            elementDoneStack.append(nil)
+            elementDoneStack[elementDoneStack.count - 1] = nil
             return String(repeating: "#", count: level) + " "
         } else {
             return nil

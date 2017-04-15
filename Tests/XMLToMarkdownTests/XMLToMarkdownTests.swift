@@ -42,9 +42,26 @@ class XMLToMarkdownTests: XCTestCase {
         issueTest("<Para><codeVoice>\(str)</codeVoice></Para>", "`\(str)`")
     }
 
-    func testEscapes() {
+    func testInlineEscapes() {
         let xmlStr = "`Str` __with__ *inside* it"
         let mdStr  = "\\`Str\\` \\_\\_with\\_\\_ \\*inside\\* it"
+        issueTest("<Para>\(xmlStr)</Para>", mdStr)
+    }
+
+    func testBulletEscapes() {
+        let xmlStr1 = "- this is not a bullet"
+        let mdStr1 = "\\- this is not a bullet"
+        let xmlStr2 = "1. neither is this"
+        let mdStr2 = "1\\. neither is this"
+        let xmlStr3 = "+ nor this"
+        let mdStr3 = "\\+ nor this"
+        issueTest("<Para>\(xmlStr1)</Para><Para>\(xmlStr2)</Para><Para>\(xmlStr3)</Para>",
+                  "\(mdStr1)\n\n\(mdStr2)\n\n\(mdStr3)")
+    }
+
+    func testHeadingEscape() {
+        let xmlStr = "## this is not a heading ##"
+        let mdStr  = "\\#\\# this is not a heading \\#\\#"
         issueTest("<Para>\(xmlStr)</Para>", mdStr)
     }
 
