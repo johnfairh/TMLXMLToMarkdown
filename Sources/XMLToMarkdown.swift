@@ -63,37 +63,6 @@ extension NSRegularExpression {
 
 public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
-    /// Keep track of indent from left margin to content-start
-    /// This is not good enough wrt the width of the bullet-indents... will need a stack...
-    enum Indent {
-        case none
-        case some(Int)
-
-        private static let INDENT_WIDTH = 4
-
-        func prefix() -> String {
-            switch self {
-            case .none: return ""
-            case .some(let level): return String(repeating: " ", count: Indent.INDENT_WIDTH * level)
-            }
-        }
-
-        mutating func inc() {
-            switch self {
-            case .none: self = .some(1)
-            case .some(let level): self = .some(level + 1)
-            }
-        }
-
-        mutating func dec() {
-            switch self {
-            case .none: break
-            case .some(1): self = .none
-            case .some(let level): self = .some(level - 1)
-            }
-        }
-    }
-
     /// XML element names we recognize
     enum Element: String {
         case discussion        = "Discussion"
@@ -105,11 +74,30 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         case zCodeLineNumbered = "zCodeLineNumbered"
         case link              = "Link"
         case rawHTML           = "rawHTML"
+        case listBullet        = "List-Bullet"
+        case listNumber        = "List-Number"
+        case item              = "Item"
     }
 
-    // Stuff that doesn't work in Xcode 8.1 markup although it is documented:
+    /// Elements we can be inside that affect child-element formatting
+    struct Inside: OptionSet {
+        let rawValue: Int
+
+        static let nothing     = Inside(rawValue: 0)
+        static let para        = Inside(rawValue: 1<<0)
+        static let codeListing = Inside(rawValue: 1<<1)
+        static let htmlHeading = Inside(rawValue: 1<<2)
+        static let listBullet  = Inside(rawValue: 1<<3)
+        static let listNumber  = Inside(rawValue: 1<<4)
+
+        static let allLists: Inside = [.listBullet, .listNumber]
+    }
+    private var inside: Inside = .nothing
+
+    // Stuff that doesn't work in Xcode 8.3 markup although it is documented:
     // 1. Backslash at end of line causes hard linebreak.
     // 2. Smart ordered list items, ie. start with '4.' and it follows.
+    // 3. 4-space indent to indent hrs + headings (!)
     //
     // Stuff hinted at https://github.com/apple/swift/blob/master/include/swift/Markup/ASTNodes.def
     // that isn't documented:
@@ -118,20 +106,32 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     /// Accumulated markdown
     private var output = ""
 
-    /// Indent level (from lists)
-    private var indent = Indent.none
+    /// Indentation level caused by nested lists
+    struct Indent {
+        private var level = 0
+        private var skip  = false
 
-    /// Are we in a CodeListing?
-    private var inCodeListing = false
+        mutating func reset()    { level = 0; skip = false }
+        mutating func inc()      { level += 1 }
+        mutating func dec()      { level -= 1 }
+        mutating func skipNext() { skip = true }
 
-    /// Are we in a Para?
-    private var inPara = false
+        private static let WIDTH = 4
+
+        mutating func prefix() -> String {
+            if skip {
+                skip = false
+                return ""
+            }
+            return String(repeating: " ", count: Indent.WIDTH * level)
+        }
+    }
+    private var indent = Indent()
 
     private func reset() {
         output = ""
-        indent = .none
-        inCodeListing = false
-        inPara = false
+        indent.reset()
+        inside = .nothing
         elementDoneStack = []
     }
 
@@ -165,10 +165,6 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
     /// Main formatter - spot interesting tags, do something + schedule more work for when the element ends.
     public func parser(_ parser: XMLParser, didStartElement elementName: String, namespaceURI: String?, qualifiedName qName: String?, attributes attributeDict: [String : String] = [:]) {
-        // List-Bullet - indent++, remember ul - extra newline if indent0 to avoid redcarpet confusion [more
-        // List-Number - indent++, remember ol and ffs have to keep a stack of the counter...
-        // Item - emit bullet, spaces for indent
-
         guard let element = Element(rawValue: elementName) else {
             // TODO: warning unknown element
             elementDoneStack.append(nil)
@@ -183,50 +179,74 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             elementDone = {
                 self.output = self.output.trimmingCharacters(in: .whitespacesAndNewlines)
             }
-            break
+
         case .emphasis:
             output += "*"
             elementDone = { self.output += "*" }
-            break
         case .strong:
             output += "**"
             elementDone = { self.output += "**" }
-            break
         case .codeVoice:
             output += "`"
             elementDone = { self.output += "`" }
-            break
-        case .para:
-            output += indent.prefix()
-            inPara = true
-            elementDone = {
-                self.output += "\n\n"
-                self.inPara = false
-            }
-            break
-        case .codeListing:
-            output += indent.prefix() + "```" + (attributeDict["language"] ?? "") + "\n"
-            inCodeListing = true
-            elementDone = {
-                self.output += self.indent.prefix() + "```\n\n"
-                self.inCodeListing = false
-            }
-            break
-        case .zCodeLineNumbered:
-            break
+
         case .link:
             output += "["
             elementDone = {
                 let href = attributeDict["href"] ?? ""
                 self.output += "](\(href))"
             }
+
+        case .para:
+            output += indent.prefix()
+            inside.insert(.para)
+            elementDone = {
+                self.output += "\n\n"
+                self.inside.remove(.para)
+            }
+
+        case .codeListing:
+            output += indent.prefix() + "```" + (attributeDict["language"] ?? "") + "\n"
+            inside.insert(.codeListing)
+            elementDone = {
+                self.output += self.indent.prefix() + "```\n\n"
+                self.inside.remove(.codeListing)
+            }
+        case .zCodeLineNumbered:
             break
+
         case .rawHTML:
             // Can be block or inline :(  If block then have to do indent + paragraphing.
-            if !inPara {
+            if !inside.contains(.para) {
                 output += indent.prefix()
-                elementDone = { self.output += "\n\n" }
+                elementDone = {
+                    if !self.inside.contains(.htmlHeading) {
+                        self.output += "\n\n"
+                    }
+                    self.inside.remove(.htmlHeading)
+                }
             }
+
+        case .listBullet, .listNumber:
+            output += indent.prefix()
+            indent.inc()
+            // must remember what type of bullet to make and store what we're doing now for later.
+            let currentList = inside.remove(.allLists) ?? .nothing
+            inside.insert(element == .listBullet ? .listBullet : .listNumber)
+            elementDone = {
+                self.indent.dec()
+                self.inside.remove(.allLists)
+                self.inside.insert(currentList)
+            }
+
+        case .item:
+            if inside.contains(.listBullet) {
+                output += "- "
+            } else {
+                output += "1. " // thankfully we can cheat here :)
+            }
+            // no indent for next <para> - follows bullet directly
+            indent.skipNext()
         }
 
         elementDoneStack.append(elementDone)
@@ -258,7 +278,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             fatalError("CDATA is not utf8 \(CDATABlock as NSData)")
         }
 
-        if inCodeListing {
+        if inside.contains(.codeListing) {
             output += indent.prefix() + cdataString + "\n"
         } else if let imageLink = parseImageLink(html: cdataString) {
             output += imageLink
@@ -310,7 +330,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             return ""
         } else if let level = Int(matchedStrings[2]!) {
             // need to NOT have a newline after this html...
-            elementDoneStack[elementDoneStack.count - 1] = nil
+            inside.insert(.htmlHeading)
             return String(repeating: "#", count: level) + " "
         } else {
             return nil
