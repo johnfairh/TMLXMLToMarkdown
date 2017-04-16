@@ -209,23 +209,109 @@ class XMLToMarkdownTests: XCTestCase {
             "\(para2)")
     }
 
-    func testSimpleBullets() { // custom list numbering, change lists on bullet type
-        XCTFail()
+    func testSimpleList() {
+        let item1 = "Item 1"
+        let item2 = "Item 2"
+
+        issueTest(
+            "<List-Bullet>" +
+            "<Item><Para>\(item1)</Para></Item>" +
+            "<Item><Para>\(item2)</Para></Item>" +
+            "</List-Bullet>",
+            "- \(item1)\n" +
+            "- \(item2)")
+    }
+
+    func testMultiParaListItem() {
+        let item1p1 = "Item 1 para 1"
+        let item1p2 = "Item 1 para 2"
+        let item2 = "Item 2"
+
+        issueTest(
+            "<List-Bullet>" +
+                "<Item><Para>\(item1p1)</Para><Para>\(item1p2)</Para></Item>" +
+                "<Item><Para>\(item2)</Para></Item>" +
+            "</List-Bullet>",
+            "- \(item1p1)\n" +
+            "\n" +
+            "    \(item1p2)\n" +
+            "- \(item2)")
     }
     
-    func testNestedBullets() {
-        XCTFail()
+    func testNestedLists() {
+        let l1i1 = "Level 1 Item 1"
+        let l2i1 = "Level 2 Item 1"
+        let l2i2 = "Level 2 Item 2"
+        let l1i2 = "Level 1 Item 1"
+
+        issueTest(
+            "<List-Number>" +
+                "<Item><Para>\(l1i1)</Para>" +
+                "<List-Bullet>" +
+                    "<Item><Para>\(l2i1)</Para></Item>" +
+                    "<Item><Para>\(l2i2)</Para></Item>" +
+                "</List-Bullet>" +
+                "</Item>" +
+                "<Item><Para>\(l1i2)</Para></Item>" +
+            "</List-Number>",
+            "1. \(l1i1)\n" +
+            "    - \(l2i1)\n" +
+            "    - \(l2i2)\n" +
+            "1. \(l1i2)")
     }
-    
-    func testNestedParas() {
-        XCTFail()
+
+    func testBlankLineBeforeList() {
+        let para = "Para"
+        let bullet1 = "Bullet1"
+        let bullet2 = "Bullet2"
+
+        issueTest(
+            "<Para>\(para)</Para>" +
+            "<List-Bullet>" +
+                "<Item><Para>\(bullet1)</Para>" +
+                "<List-Bullet>" +
+                    "<Item><Para>\(bullet2)</Para></Item>" +
+                "</List-Bullet></Item>" +
+            "</List-Bullet>",
+            "\(para)\n" +
+            "\n" +
+            "- \(bullet1)\n" +
+            "    - \(bullet2)")
     }
-    
-    func testNestedCodeBlock() {
-        XCTFail()
-    }
-    
-    func testUnknownElement() {
-        XCTFail()
+
+    // from the apple documentation on indents...
+    func testNestedVarious() {
+        let l1i1 = "Level 1, Item 1"
+        let l2i1 = "Level 2, Item 1"
+        let code = "func emptyFunc() {}"
+        let l2i2 = "Level 2, Item 2"
+        let l1i2 = "Level 1, Item 1"
+
+        issueTest(
+            "<List-Number>" +
+                "<Item><Para>\(l1i1)</Para>" +
+                "<List-Number>" +
+                    "<Item><Para>\(l2i1)</Para>" +
+                    "<CodeListing language=\"swift\">" +
+                    "<zCodeLineNumbered><![CDATA[\(code)]]></zCodeLineNumbered>" +
+                    "</CodeListing>" +
+                    "<rawHTML><![CDATA[<hr/>]]></rawHTML>" +
+                    "</Item>" +
+                    "<Item><Para>\(l2i2)</Para></Item>" +
+                "</List-Number>" +
+                "</Item>" +
+                "<Item><Para>\(l1i2)</Para></Item>" +
+            "</List-Number>",
+
+            "1. \(l1i1)\n" +
+            "    1. \(l2i1)\n" +
+            "\n" +
+            "        ```swift\n" +
+            "        \(code)\n" +
+            "        ```\n" +
+            "\n" +
+            "        ---\n" +
+            "    1. \(l2i2)\n" +
+            "1. \(l1i2)")
     }
 }
