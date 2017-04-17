@@ -20,8 +20,9 @@ class XMLToMarkdownTests: XCTestCase {
                 XCTFail("Error handler called")
             }
         }
-        let discussionXml = "<Discussion>\(xml)</Discussion>"
-        let actualMarkdown = parser.parseDiscussion(xml: discussionXml)
+        parser.startMarkdown()
+        parser.parse(xml: "<Outer>\(xml)</Outer>")
+        let actualMarkdown = parser.endMarkdown()
         if let expectMarkdown = expectMarkdown {
             XCTAssertEqual(actualMarkdown, expectMarkdown)
         }

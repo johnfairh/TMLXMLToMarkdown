@@ -11,70 +11,27 @@
 
 import Foundation
 
-// MARK: Additions to help with regular expressions
+// MARK: XMLToMarkdownClient
 
-extension String {
-
-    /// An NSRange corresponding to the entire string
-    var nsRange: NSRange {
-        return NSMakeRange(0, utf16.count)
-    }
-
-    /// The substring corresponding to an NSRange, or empty if none
-    subscript(nsRange: NSRange) -> String {
-        let strLower = String.UTF16Index(nsRange.location)
-        let strUpper = String.UTF16Index(nsRange.location + nsRange.length)
-
-        return String(utf16[strLower..<strUpper]) ?? ""
-    }
-}
-
-extension NSTextCheckingResult {
-    /// The substrings corresponding to the matches
-    func rangesToStrings(from string: String) -> [String?] {
-        var strings: [String?] = []
-        for rangeIdx in 0..<numberOfRanges {
-            let range = rangeAt(rangeIdx)
-            if range.location != NSNotFound {
-                strings.append(string[range])
-            } else {
-                // capture group was optional and not matched
-                strings.append(nil)
-            }
-        }
-        return strings
-    }
-}
-
-extension NSRegularExpression {
-    // The substrings corresponding to matches, or nil if no match
-    func matches(in string: String) -> [String?]? {
-        let results = matches(in: string, range: string.nsRange)
-
-        guard results.count > 0 else {
-            return nil
-        }
-
-        return results[0].rangesToStrings(from: string)
-    }
+public protocol XMLToMarkdownClient {
+    /// Called at the start of an element not handled by the markdown parser.
+    /// Any closure returned is called at the end of the element after its
+    /// subdocument has been parsed.
+    ///
+    /// Client should use the elements to understand the structure of the
+    /// document and call `markdownParser.startMarkdown` and `endMarkdown` to
+    /// retrieve subdocuments of markdown.
+    func didStartElement(_ name: String,
+                         attributes attributeDict: [String : String],
+                         markdownParser: XMLToMarkdown) -> XMLToMarkdown.ElementDone?
 }
 
 // MARK: XMLToMarkdown
-
-// Stuff that doesn't work in Xcode 8.3 markup although it is documented:
-// 1. Backslash at end of line causes hard linebreak.
-// 2. Smart ordered list items, ie. start with '4.' and it follows.
-// 3. 4-space indent to indent hrs + headings (!)
-//
-// Stuff hinted at https://github.com/apple/swift/blob/master/include/swift/Markup/ASTNodes.def
-// that isn't documented:
-// 1. BlockQuote
 
 public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
     /// XML element names we recognize
     enum Element: String {
-        case discussion        = "Discussion"
         case para              = "Para"
         case strong            = "strong"
         case emphasis          = "emphasis"
@@ -114,8 +71,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         mutating func skipNext()         { skip = true }
         mutating func doSkip() -> String { skip = false; return "" }
 
-        // initial state includes skip to avoid leading newlines
-        mutating func reset() { indentLevel = 0; skip = true }
+        mutating func reset() { indentLevel = 0; skip = false }
 
         private static let INDENT_WIDTH = 4
 
@@ -150,33 +106,38 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     /// Currently accumulated markdown
     private var markdown = ""
 
-    /// Reset parser state for new input
-    private func reset() {
+    /// Called by client to indicate a new markdown document is starting
+    public func startMarkdown() {
         markdown = ""
         whitespace.reset()
         inside = .nothing
-        elementDoneStack = []
     }
+
+    /// Called by client to retrieve the current parsed markdown
+    public func endMarkdown() -> String {
+        return markdown.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Client element handler
+    private var client: XMLToMarkdownClient? = nil
 
     /// Problem reporting
     public typealias ErrorHandler = (String) -> Void
     private let errorHandler: ErrorHandler?
 
-    /// Create a new SourceKit XML converter.
+    /// Create a new SourceKit XML parser.
     public init(errorHandler: ErrorHandler? = nil) {
         self.errorHandler = errorHandler
         super.init()
     }
 
     /// Convert SourceKit XML to Redcarpet markdown
-    ///
-    /// - Parameter xml: SourceKit XML
-    /// - Returns: Markdown version of the XML.  Empty string on any failure.
-    public func parseDiscussion(xml: String) -> String {
-        reset()
+    public func parse(xml: String, client: XMLToMarkdownClient? = nil) {
+        elementDoneStack = []
+        self.client = client
 
         if let xmlData = xml.data(using: .utf8) {
-            let parser  = XMLParser(data: xmlData)
+            let parser = XMLParser(data: xmlData)
             parser.delegate = self
             let success = parser.parse()
             if !success {
@@ -189,12 +150,11 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
                 errorHandler?("Current line is \(parser.lineNumber) column is \(parser.columnNumber)")
             }
         }
-
-        return markdown
+        self.client = nil
     }
 
     /// Stack of work to do as elements close
-    private typealias ElementDone = () -> Void
+    public typealias ElementDone = () -> Void
     private var elementDoneStack: [ElementDone?] = []
 
     /// Spot interesting elements, do something + schedule more work for when the element ends.
@@ -203,20 +163,19 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
                        namespaceURI: String?,
                        qualifiedName qName: String?,
                        attributes attributeDict: [String : String]) {
+
         guard let element = Element(rawValue: elementName) else {
-            elementDoneStack.append(nil)
+            // Not a markdown element, let client handle it
+            let clientElementDone = client?.didStartElement(elementName,
+                                                            attributes: attributeDict,
+                                                            markdownParser: self) ?? nil
+            elementDoneStack.append(clientElementDone)
             return
         }
 
         var elementDone: ElementDone? = nil
 
         switch element {
-        case .discussion:
-            elementDone = {
-                self.markdown = self.markdown.trimmingCharacters(in: .whitespacesAndNewlines)
-            }
-            break
-
         case .emphasis:
             markdown += "*"
             elementDone = { self.markdown += "*" }
@@ -383,5 +342,52 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     
     public func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
         errorHandler?("XMLParserDelegate.parseErrorOccurred - \(parseError)")
+    }
+}
+
+// MARK: Additions to help with regular expressions
+
+extension String {
+    /// An NSRange corresponding to the entire string
+    var nsRange: NSRange {
+        return NSMakeRange(0, utf16.count)
+    }
+
+    /// The substring corresponding to an NSRange, or empty if none
+    subscript(nsRange: NSRange) -> String {
+        let strLower = String.UTF16Index(nsRange.location)
+        let strUpper = String.UTF16Index(nsRange.location + nsRange.length)
+
+        return String(utf16[strLower..<strUpper]) ?? ""
+    }
+}
+
+extension NSTextCheckingResult {
+    /// The substrings corresponding to the matches
+    func rangesToStrings(from string: String) -> [String?] {
+        var strings: [String?] = []
+        for rangeIdx in 0..<numberOfRanges {
+            let range = rangeAt(rangeIdx)
+            if range.location != NSNotFound {
+                strings.append(string[range])
+            } else {
+                // capture group was optional and not matched
+                strings.append(nil)
+            }
+        }
+        return strings
+    }
+}
+
+extension NSRegularExpression {
+    // The substrings corresponding to matches, or nil if no match
+    func matches(in string: String) -> [String?]? {
+        let results = matches(in: string, range: string.nsRange)
+
+        guard results.count > 0 else {
+            return nil
+        }
+
+        return results[0].rangesToStrings(from: string)
     }
 }

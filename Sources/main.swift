@@ -13,6 +13,12 @@ import Foundation
 
 let xmlToMarkdown = XMLToMarkdown()
 
+func doParse(xml: String) {
+    xmlToMarkdown.startMarkdown()
+    xmlToMarkdown.parse(xml: xml)
+    print(xmlToMarkdown.endMarkdown())
+}
+
 if CommandLine.arguments.count > 1 {
     CommandLine.arguments.suffix(from: 1).forEach { file in
         guard let data = FileManager.default.contents(atPath: file) else {
@@ -25,15 +31,12 @@ if CommandLine.arguments.count > 1 {
             return
         }
 
-        let md = xmlToMarkdown.parseDiscussion(xml: xml)
-
-        print(md)
+        doParse(xml: xml)
     }
 } else {
     var xml = ""
     while let line = readLine() {
         xml += line
     }
-    let md = xmlToMarkdown.parseDiscussion(xml: xml)
-    print(md)
+    doParse(xml: xml)
 }
