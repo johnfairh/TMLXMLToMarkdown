@@ -103,10 +103,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     }
     private var inside = Inside.nothing
 
-    /// Accumulated markdown
-    private var markdown = ""
-
-    /// Whitespace at the start of each line
+    /// Control whitespace at the start of each markdown line
     struct Whitespace {
         private var indentLevel = 0
         mutating func indent()  { indentLevel += 1 }
@@ -150,6 +147,9 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     }
     private var whitespace = Whitespace()
 
+    /// Currently accumulated markdown
+    private var markdown = ""
+
     /// Reset parser state for new input
     private func reset() {
         markdown = ""
@@ -158,8 +158,14 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         elementDoneStack = []
     }
 
+    /// Problem reporting
+    public typealias ErrorHandler = (String) -> Void
+    private let errorHandler: ErrorHandler?
+
     /// Create a new SourceKit XML converter.
-    public override init() {
+    public init(errorHandler: ErrorHandler? = nil) {
+        self.errorHandler = errorHandler
+        super.init()
     }
 
     /// Convert SourceKit XML to Redcarpet markdown
@@ -174,8 +180,13 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             parser.delegate = self
             let success = parser.parse()
             if !success {
-                // TODO: error
-                fatalError("Failed??")
+                if let parserError = parser.parserError {
+                    errorHandler?("XMLParser.parse failed, parserError \(parserError))")
+                } else {
+                    errorHandler?("XMLParser.parser failed, no parserError")
+                }
+                errorHandler?("XML was \(xml), current markdown is \(markdown)")
+                errorHandler?("Current line is \(parser.lineNumber) column is \(parser.columnNumber)")
             }
         }
 
@@ -193,7 +204,6 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
                        qualifiedName qName: String?,
                        attributes attributeDict: [String : String]) {
         guard let element = Element(rawValue: elementName) else {
-            // TODO: warning unknown element
             elementDoneStack.append(nil)
             return
         }
@@ -307,8 +317,8 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     /// Headings and HR in markdown end up as HTML rather than tags.
     public func parser(_ parser: XMLParser, foundCDATA CDATABlock: Data) {
         guard let cdataString = String(data: CDATABlock, encoding: .utf8) else {
-            // TODO: error
-            fatalError("CDATA is not utf8 \(CDATABlock as NSData)")
+            errorHandler?("Can't decode CDATA to UTF8 \(CDATABlock as NSData)")
+            return
         }
 
         if inside.contains(.codeListing) {
@@ -372,6 +382,6 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     }
     
     public func parser(_ parser: XMLParser, parseErrorOccurred parseError: Error) {
-        // TODO: report
+        errorHandler?("XMLParserDelegate.parseErrorOccurred - \(parseError)")
     }
 }

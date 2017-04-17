@@ -9,11 +9,22 @@ import XCTest
 
 class XMLToMarkdownTests: XCTestCase {
 
-    private func issueTest(_ xml: String, _ expectMarkdown: String) {
-        let parser = XMLToMarkdown()
+    private var errorHandlerWasCalled = false
+
+    private func issueTest(_ xml: String, _ expectMarkdown: String?, stopOnError: Bool = true) {
+        errorHandlerWasCalled = false
+        let parser = XMLToMarkdown() { errorString in
+            print(errorString)
+            self.errorHandlerWasCalled = true
+            if stopOnError {
+                XCTFail("Error handler called")
+            }
+        }
         let discussionXml = "<Discussion>\(xml)</Discussion>"
         let actualMarkdown = parser.parseDiscussion(xml: discussionXml)
-        XCTAssertEqual(actualMarkdown, expectMarkdown)
+        if let expectMarkdown = expectMarkdown {
+            XCTAssertEqual(actualMarkdown, expectMarkdown)
+        }
     }
 
     func testSimplePara() {
@@ -313,5 +324,10 @@ class XMLToMarkdownTests: XCTestCase {
             "        ---\n" +
             "    1. \(l2i2)\n" +
             "1. \(l1i2)")
+    }
+
+    func testErrorHandling() {
+        issueTest("<Para>Poorly formed XML", nil, stopOnError: false)
+        XCTAssertTrue(errorHandlerWasCalled)
     }
 }
