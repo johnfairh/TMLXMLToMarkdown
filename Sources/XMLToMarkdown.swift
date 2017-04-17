@@ -104,7 +104,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     private var inside = Inside.nothing
 
     /// Accumulated markdown
-    private var output = ""
+    private var markdown = ""
 
     /// Whitespace at the start of each line
     struct Whitespace {
@@ -152,7 +152,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
     /// Reset parser state for new input
     private func reset() {
-        output = ""
+        markdown = ""
         whitespace.reset()
         inside = .nothing
         elementDoneStack = []
@@ -179,7 +179,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             }
         }
 
-        return output
+        return markdown
     }
 
     /// Stack of work to do as elements close
@@ -203,40 +203,40 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         switch element {
         case .discussion:
             elementDone = {
-                self.output = self.output.trimmingCharacters(in: .whitespacesAndNewlines)
+                self.markdown = self.markdown.trimmingCharacters(in: .whitespacesAndNewlines)
             }
             break
 
         case .emphasis:
-            output += "*"
-            elementDone = { self.output += "*" }
+            markdown += "*"
+            elementDone = { self.markdown += "*" }
         case .strong:
-            output += "**"
-            elementDone = { self.output += "**" }
+            markdown += "**"
+            elementDone = { self.markdown += "**" }
         case .codeVoice:
-            output += "`"
-            elementDone = { self.output += "`" }
+            markdown += "`"
+            elementDone = { self.markdown += "`" }
 
         case .link:
-            output += "["
+            markdown += "["
             elementDone = {
                 let href = attributeDict["href"] ?? ""
-                self.output += "](\(href))"
+                self.markdown += "](\(href))"
             }
 
         case .para:
-            output += whitespace.newlineAndPrefix()
+            markdown += whitespace.newlineAndPrefix()
             inside.insert(.para)
             elementDone = {
-                self.output += "\n"
+                self.markdown += "\n"
                 self.inside.remove(.para)
             }
 
         case .codeListing:
-            output += whitespace.newlineAndPrefix() + "```" + (attributeDict["language"] ?? "") + "\n"
+            markdown += whitespace.newlineAndPrefix() + "```" + (attributeDict["language"] ?? "") + "\n"
             inside.insert(.codeListing)
             elementDone = {
-                self.output += self.whitespace.prefix() + "```\n"
+                self.markdown += self.whitespace.prefix() + "```\n"
                 self.inside.remove(.codeListing)
             }
         case .zCodeLineNumbered:
@@ -245,10 +245,10 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         case .rawHTML:
             // Can be block or inline :(  If block then have to do indent + paragraphing.
             if !inside.contains(.para) {
-                output += whitespace.newlineAndPrefix()
+                markdown += whitespace.newlineAndPrefix()
                 elementDone = {
                     if !self.inside.contains(.htmlHeading) {
-                        self.output += "\n"
+                        self.markdown += "\n"
                     }
                     self.inside.remove(.htmlHeading)
                 }
@@ -262,7 +262,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
             // redcarpet 'hmm', must have blank line iff not currently inside a list
             if currentList == .nothing {
-                output += whitespace.newline()
+                markdown += whitespace.newline()
             }
             whitespace.indent()
             elementDone = {
@@ -272,11 +272,11 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             }
 
         case .item:
-            output += whitespace.listItemPrefix()
+            markdown += whitespace.listItemPrefix()
             if inside.contains(.listBullet) {
-                output += "- "
+                markdown += "- "
             } else {
-                output += "1. " // thankfully we can cheat here :)
+                markdown += "1. " // thankfully we can cheat here :)
             }
             // no indent for whatever is next, follows bullet directly
             whitespace.skipNext()
@@ -300,7 +300,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
     public func parser(_ parser: XMLParser, foundCharacters string: String) {
         let regex = XMLToMarkdown.markdownCharsRegex
-        output += regex.stringByReplacingMatches(in: string, range: string.nsRange, withTemplate: "\\\\$0")
+        markdown += regex.stringByReplacingMatches(in: string, range: string.nsRange, withTemplate: "\\\\$0")
     }
 
     /// CDATA.  Used for html, stuff that looks like html, each line of a code block.
@@ -312,15 +312,15 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         }
 
         if inside.contains(.codeListing) {
-            output += whitespace.prefix() + cdataString + "\n"
+            markdown += whitespace.prefix() + cdataString + "\n"
         } else if let imageLink = parseImageLink(html: cdataString) {
-            output += imageLink
+            markdown += imageLink
         } else if cdataString == "<hr/>" {
-            output += "---"
+            markdown += "---"
         } else if let heading = parseHeading(html: cdataString) {
-            output += heading
+            markdown += heading
         } else {
-            output += cdataString
+            markdown += cdataString
         }
     }
 
