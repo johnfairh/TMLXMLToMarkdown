@@ -4,32 +4,21 @@
 //
 //  Distributed under the ISC license, see LICENSE.
 //
-
-//
-// indexer["Discussion"].element!.description
-//
-
 import Foundation
 
 // MARK: XMLToMarkdownClient
 
 public protocol XMLToMarkdownClient {
     /// Called at the start of an element not handled by the markdown parser.
-    /// Any closure returned is called at the end of the element after its
-    /// subdocument has been parsed.
-    ///
-    /// Client should use the elements to understand the structure of the
-    /// document and call `markdownParser.startMarkdown` and `endMarkdown` to
-    /// retrieve subdocuments of markdown.
+    /// Any closure returned is called at the end of the element
     func didStartElement(_ name: String,
-                         attributes attributeDict: [String : String],
-                         markdownParser: XMLToMarkdown) -> XMLToMarkdown.ElementDone?
+                         attributes: [String : String],
+                         parser: XMLToMarkdown) -> XMLToMarkdown.ElementDone?
 }
 
 // MARK: XMLToMarkdown
 
 public class XMLToMarkdown: NSObject, XMLParserDelegate {
-
     /// XML element names we recognize
     enum Element: String {
         case para              = "Para"
@@ -55,6 +44,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         static let htmlHeading = Inside(rawValue: 1<<2)
         static let listBullet  = Inside(rawValue: 1<<3)
         static let listNumber  = Inside(rawValue: 1<<4)
+        static let plainText   = Inside(rawValue: 1<<5)
 
         static let allLists: Inside = [.listBullet, .listNumber]
     }
@@ -103,19 +93,31 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     }
     private var whitespace = Whitespace()
 
-    /// Currently accumulated markdown
-    private var markdown = ""
+    /// Currently accumulated markdown/text
+    private var output = ""
 
     /// Called by client to indicate a new markdown document is starting
     public func startMarkdown() {
-        markdown = ""
+        output = ""
         whitespace.reset()
         inside = .nothing
     }
 
     /// Called by client to retrieve the current parsed markdown
     public func endMarkdown() -> String {
-        return markdown.trimmingCharacters(in: .whitespacesAndNewlines)
+        return output.trimmingCharacters(in: .whitespacesAndNewlines)
+    }
+
+    /// Called by client to start accumulating unadulterated text
+    public func startText() {
+        output = ""
+        whitespace.reset()
+        inside = .plainText
+    }
+
+    /// Called by client to retrieve current plain text
+    public func endText() -> String {
+        return output
     }
 
     /// Client element handler
@@ -131,6 +133,9 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         super.init()
     }
 
+    /// The actual foundation parser that does the work
+    private var xmlParser: XMLParser?
+
     /// Convert SourceKit XML to Redcarpet markdown
     public func parse(xml: String, client: XMLToMarkdownClient? = nil) {
         elementDoneStack = []
@@ -139,6 +144,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         if let xmlData = xml.data(using: .utf8) {
             let parser = XMLParser(data: xmlData)
             parser.delegate = self
+            xmlParser = parser
             let success = parser.parse()
             if !success {
                 if let parserError = parser.parserError {
@@ -146,11 +152,17 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
                 } else {
                     errorHandler?("XMLParser.parser failed, no parserError")
                 }
-                errorHandler?("XML was \(xml), current markdown is \(markdown)")
+                errorHandler?("XML was \(xml), current output is \(output)")
                 errorHandler?("Current line is \(parser.lineNumber) column is \(parser.columnNumber)")
             }
+            xmlParser = nil
         }
         self.client = nil
+    }
+
+    /// Stop parsing elements immediately
+    public func abort() {
+        xmlParser?.abortParsing()
     }
 
     /// Stack of work to do as elements close
@@ -168,7 +180,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             // Not a markdown element, let client handle it
             let clientElementDone = client?.didStartElement(elementName,
                                                             attributes: attributeDict,
-                                                            markdownParser: self) ?? nil
+                                                            parser: self) ?? nil
             elementDoneStack.append(clientElementDone)
             return
         }
@@ -177,35 +189,35 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
         switch element {
         case .emphasis:
-            markdown += "*"
-            elementDone = { self.markdown += "*" }
+            output += "*"
+            elementDone = { self.output += "*" }
         case .strong:
-            markdown += "**"
-            elementDone = { self.markdown += "**" }
+            output += "**"
+            elementDone = { self.output += "**" }
         case .codeVoice:
-            markdown += "`"
-            elementDone = { self.markdown += "`" }
+            output += "`"
+            elementDone = { self.output += "`" }
 
         case .link:
-            markdown += "["
+            output += "["
             elementDone = {
                 let href = attributeDict["href"] ?? ""
-                self.markdown += "](\(href))"
+                self.output += "](\(href))"
             }
 
         case .para:
-            markdown += whitespace.newlineAndPrefix()
+            output += whitespace.newlineAndPrefix()
             inside.insert(.para)
             elementDone = {
-                self.markdown += "\n"
+                self.output += "\n"
                 self.inside.remove(.para)
             }
 
         case .codeListing:
-            markdown += whitespace.newlineAndPrefix() + "```" + (attributeDict["language"] ?? "") + "\n"
+            output += whitespace.newlineAndPrefix() + "```" + (attributeDict["language"] ?? "") + "\n"
             inside.insert(.codeListing)
             elementDone = {
-                self.markdown += self.whitespace.prefix() + "```\n"
+                self.output += self.whitespace.prefix() + "```\n"
                 self.inside.remove(.codeListing)
             }
         case .zCodeLineNumbered:
@@ -214,10 +226,10 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         case .rawHTML:
             // Can be block or inline :(  If block then have to do indent + paragraphing.
             if !inside.contains(.para) {
-                markdown += whitespace.newlineAndPrefix()
+                output += whitespace.newlineAndPrefix()
                 elementDone = {
                     if !self.inside.contains(.htmlHeading) {
-                        self.markdown += "\n"
+                        self.output += "\n"
                     }
                     self.inside.remove(.htmlHeading)
                 }
@@ -231,7 +243,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
 
             // redcarpet 'hmm', must have blank line iff not currently inside a list
             if currentList == .nothing {
-                markdown += whitespace.newline()
+                output += whitespace.newline()
             }
             whitespace.indent()
             elementDone = {
@@ -241,11 +253,11 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             }
 
         case .item:
-            markdown += whitespace.listItemPrefix()
+            output += whitespace.listItemPrefix()
             if inside.contains(.listBullet) {
-                markdown += "- "
+                output += "- "
             } else {
-                markdown += "1. " // thankfully we can cheat here :)
+                output += "1. " // thankfully we can cheat here :)
             }
             // no indent for whatever is next, follows bullet directly
             whitespace.skipNext()
@@ -268,8 +280,12 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
     }()
 
     public func parser(_ parser: XMLParser, foundCharacters string: String) {
-        let regex = XMLToMarkdown.markdownCharsRegex
-        markdown += regex.stringByReplacingMatches(in: string, range: string.nsRange, withTemplate: "\\\\$0")
+        if inside.contains(.plainText) {
+            output += string
+        } else {
+            let regex = XMLToMarkdown.markdownCharsRegex
+            output += regex.stringByReplacingMatches(in: string, range: string.nsRange, withTemplate: "\\\\$0")
+        }
     }
 
     /// CDATA.  Used for html, stuff that looks like html, each line of a code block.
@@ -281,15 +297,15 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
         }
 
         if inside.contains(.codeListing) {
-            markdown += whitespace.prefix() + cdataString + "\n"
+            output += whitespace.prefix() + cdataString + "\n"
         } else if let imageLink = parseImageLink(html: cdataString) {
-            markdown += imageLink
+            output += imageLink
         } else if cdataString == "<hr/>" {
-            markdown += "---"
+            output += "---"
         } else if let heading = parseHeading(html: cdataString) {
-            markdown += heading
+            output += heading
         } else {
-            markdown += cdataString
+            output += cdataString
         }
     }
 
