@@ -9,7 +9,8 @@ import Foundation
 
 /// The contents of SourceKit XML for a declaration.
 /// 'Discussion' fields are markdown; others are not.
-/// Does not include callouts like "- important:".
+///
+/// Picking out only the fields currently needed in sourcekitten.
 public struct XMLDeclaration {
     var file: String?
     var line: Int64?
@@ -18,8 +19,6 @@ public struct XMLDeclaration {
     var name: String?
     var usr: String?
     var declaration: String?
-    var abstract: String?
-    var discussion: String?
     var resultDiscussion: String?
     var parameters: [Parameter] = []
 
@@ -43,7 +42,6 @@ final class XMLDeclarationBuilder: XMLToMarkdownClient {
         case usr              = "USR"
         case declaration      = "Declaration"
         case discussion       = "Discussion"
-        case abstract         = "Abstract"
         case parameter        = "Parameter"
         case resultDiscussion = "ResultDiscussion"
     }
@@ -71,39 +69,9 @@ final class XMLDeclarationBuilder: XMLToMarkdownClient {
             return nil
         }
 
-        let elementDone: XMLToMarkdown.ElementDone
+        let elementDone: XMLToMarkdown.ElementDone?
 
         switch element {
-        case .discussion:
-            parser.startMarkdown()
-            elementDone = {
-                let markdown = parser.endMarkdown()
-                if self.parameter != nil {
-                    self.parameter?.discussion = markdown
-                } else {
-                    self.declaration.discussion = markdown
-                }
-            }
-
-        case .resultDiscussion:
-            parser.startMarkdown()
-            elementDone = { self.declaration.resultDiscussion = parser.endMarkdown() }
-
-        case .abstract:
-            parser.startMarkdown()
-            elementDone = { self.declaration.abstract = parser.endMarkdown() }
-
-        case .name:
-            parser.startText()
-            elementDone = {
-                let text = parser.endText()
-                if self.parameter != nil {
-                    self.parameter?.name = text
-                } else {
-                    self.declaration.name = text
-                }
-            }
-
         case .usr:
             parser.startText()
             elementDone = { self.declaration.usr = parser.endText() }
@@ -118,6 +86,33 @@ final class XMLDeclarationBuilder: XMLToMarkdownClient {
                 self.declaration.parameters.append(self.parameter!)
                 self.parameter = nil
             }
+
+        case .name:
+            parser.startText()
+            elementDone = {
+                let text = parser.endText()
+                if self.parameter != nil {
+                    self.parameter?.name = text
+                } else {
+                    self.declaration.name = text
+                }
+            }
+
+        case .discussion:
+            if self.parameter != nil {
+                parser.startMarkdown()
+                elementDone = {
+                    let markdown = parser.endMarkdown()
+                    self.parameter?.discussion = markdown
+                }
+            } else {
+                // currently ignoring main 'discussion'
+                elementDone = nil
+            }
+
+        case .resultDiscussion:
+            parser.startMarkdown()
+            elementDone = { self.declaration.resultDiscussion = parser.endMarkdown() }
         }
 
         return elementDone

@@ -202,7 +202,7 @@ public class XMLToMarkdown: NSObject, XMLParserDelegate {
             output += "["
             elementDone = {
                 let href = attributeDict["href"] ?? ""
-                self.output += "](\(href))"
+                self.output += "](\(href))" // apple markdown doesn't support a 'title' here...
             }
 
         case .para:
