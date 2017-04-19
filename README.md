@@ -1,4 +1,4 @@
-This framework provides an APIs for converting an XML document created by
+This framework provides an API for converting an XML document created by
 SourceKit that describes the documentation comment of a Swift declaration to
 markdown that is correctly parsed by redcarpet.
 
