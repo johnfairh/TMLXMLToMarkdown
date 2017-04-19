@@ -12,19 +12,19 @@ import Foundation
 ///
 /// Picking out only the fields currently needed in sourcekitten.
 public struct XMLDeclaration {
-    var file: String?
-    var line: Int64?
-    var column: Int64?
-    var type: String?
-    var name: String?
-    var usr: String?
-    var declaration: String?
-    var resultDiscussion: String?
-    var parameters: [Parameter] = []
+    public var file: String?
+    public var line: Int64?
+    public var column: Int64?
+    public var type: String?
+    public var name: String?
+    public var usr: String?
+    public var declaration: String?
+    public var resultDiscussion: String?
+    public var parameters: [Parameter] = []
 
-    struct Parameter {
-        var name: String
-        var discussion: String?
+    public struct Parameter {
+        public var name: String
+        public var discussion: String?
     }
 }
 

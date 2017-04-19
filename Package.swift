@@ -3,5 +3,8 @@
 import PackageDescription
 
 let package = Package(
-    name: "XMLToMarkdown"
+    name: "XMLToMarkdown",
+    targets: [
+        Target(name: "xmltoredcarpet", dependencies: ["XMLToMarkdown"])
+    ]
 )

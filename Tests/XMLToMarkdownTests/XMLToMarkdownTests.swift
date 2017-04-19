@@ -6,6 +6,7 @@
 //
 
 import XCTest
+import XMLToMarkdown
 
 class XMLToMarkdownTests: XCTestCase {
 
