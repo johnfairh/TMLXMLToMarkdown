@@ -15,9 +15,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "OBJ_21"
-               BuildableName = "XMLToMarkdown.framework"
-               BlueprintName = "XMLToMarkdown"
-               ReferencedContainer = "container:XMLToMarkdown.xcodeproj">
+               BuildableName = "TMLXMLToMarkdown.framework"
+               BlueprintName = "TMLXMLToMarkdown"
+               ReferencedContainer = "container:TMLXMLToMarkdown.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
          <BuildActionEntry
@@ -31,7 +31,7 @@
                BlueprintIdentifier = "OBJ_29"
                BuildableName = "xmltoredcarpet"
                BlueprintName = "xmltoredcarpet"
-               ReferencedContainer = "container:XMLToMarkdown.xcodeproj">
+               ReferencedContainer = "container:TMLXMLToMarkdown.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -47,9 +47,9 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "OBJ_38"
-               BuildableName = "XMLToMarkdownTests.xctest"
-               BlueprintName = "XMLToMarkdownTests"
-               ReferencedContainer = "container:XMLToMarkdown.xcodeproj">
+               BuildableName = "TMLXMLToMarkdownTests.xctest"
+               BlueprintName = "TMLXMLToMarkdownTests"
+               ReferencedContainer = "container:TMLXMLToMarkdown.xcodeproj">
             </BuildableReference>
          </TestableReference>
       </Testables>
@@ -70,9 +70,9 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "OBJ_21"
-            BuildableName = "XMLToMarkdown.framework"
-            BlueprintName = "XMLToMarkdown"
-            ReferencedContainer = "container:XMLToMarkdown.xcodeproj">
+            BuildableName = "TMLXMLToMarkdown.framework"
+            BlueprintName = "TMLXMLToMarkdown"
+            ReferencedContainer = "container:TMLXMLToMarkdown.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>

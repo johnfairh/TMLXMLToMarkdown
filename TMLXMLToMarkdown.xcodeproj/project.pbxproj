@@ -10,26 +10,26 @@
 		OBJ_26 /* XMLDeclaration.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_9 /* XMLDeclaration.swift */; };
 		OBJ_27 /* XMLToMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_10 /* XMLToMarkdown.swift */; };
 		OBJ_34 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_12 /* main.swift */; };
-		OBJ_36 /* XMLToMarkdown.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* XMLToMarkdown.framework */; };
+		OBJ_36 /* TMLXMLToMarkdown.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* TMLXMLToMarkdown.framework */; };
 		OBJ_43 /* XMLDeclarationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_15 /* XMLDeclarationTests.swift */; };
 		OBJ_44 /* XMLToMarkdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = OBJ_16 /* XMLToMarkdownTests.swift */; };
-		OBJ_46 /* XMLToMarkdown.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* XMLToMarkdown.framework */; };
+		OBJ_46 /* TMLXMLToMarkdown.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = OBJ_18 /* TMLXMLToMarkdown.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		02961C481EA7C3030074FB0E /* PBXContainerItemProxy */ = {
+		0256C2281EA7C794004B8743 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_21;
-			remoteInfo = XMLToMarkdown;
+			remoteInfo = TMLXMLToMarkdown;
 		};
-		02961C491EA7C3030074FB0E /* PBXContainerItemProxy */ = {
+		0256C2291EA7C794004B8743 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = OBJ_1 /* Project object */;
 			proxyType = 1;
 			remoteGlobalIDString = OBJ_21;
-			remoteInfo = XMLToMarkdown;
+			remoteInfo = TMLXMLToMarkdown;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -38,9 +38,9 @@
 		OBJ_12 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		OBJ_15 /* XMLDeclarationTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLDeclarationTests.swift; sourceTree = "<group>"; };
 		OBJ_16 /* XMLToMarkdownTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLToMarkdownTests.swift; sourceTree = "<group>"; };
-		OBJ_18 /* XMLToMarkdown.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = XMLToMarkdown.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		OBJ_18 /* TMLXMLToMarkdown.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; path = TMLXMLToMarkdown.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_19 /* xmltoredcarpet */ = {isa = PBXFileReference; lastKnownFileType = text; path = xmltoredcarpet; sourceTree = BUILT_PRODUCTS_DIR; };
-		OBJ_20 /* XMLToMarkdownTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = XMLToMarkdownTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		OBJ_20 /* TMLXMLToMarkdownTests.xctest */ = {isa = PBXFileReference; lastKnownFileType = file; path = TMLXMLToMarkdownTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		OBJ_6 /* Package.swift */ = {isa = PBXFileReference; explicitFileType = sourcecode.swift; path = Package.swift; sourceTree = "<group>"; };
 		OBJ_9 /* XMLDeclaration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = XMLDeclaration.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -57,7 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_36 /* XMLToMarkdown.framework in Frameworks */,
+				OBJ_36 /* TMLXMLToMarkdown.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,7 +65,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 0;
 			files = (
-				OBJ_46 /* XMLToMarkdown.framework in Frameworks */,
+				OBJ_46 /* TMLXMLToMarkdown.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -84,27 +84,27 @@
 		OBJ_13 /* Tests */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_14 /* XMLToMarkdownTests */,
+				OBJ_14 /* TMLXMLToMarkdownTests */,
 			);
 			name = Tests;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_14 /* XMLToMarkdownTests */ = {
+		OBJ_14 /* TMLXMLToMarkdownTests */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_15 /* XMLDeclarationTests.swift */,
 				OBJ_16 /* XMLToMarkdownTests.swift */,
 			);
-			name = XMLToMarkdownTests;
-			path = Tests/XMLToMarkdownTests;
+			name = TMLXMLToMarkdownTests;
+			path = Tests/TMLXMLToMarkdownTests;
 			sourceTree = SOURCE_ROOT;
 		};
 		OBJ_17 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_18 /* XMLToMarkdown.framework */,
+				OBJ_18 /* TMLXMLToMarkdown.framework */,
 				OBJ_19 /* xmltoredcarpet */,
-				OBJ_20 /* XMLToMarkdownTests.xctest */,
+				OBJ_20 /* TMLXMLToMarkdownTests.xctest */,
 			);
 			name = Products;
 			sourceTree = BUILT_PRODUCTS_DIR;
@@ -123,28 +123,28 @@
 		OBJ_7 /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				OBJ_8 /* XMLToMarkdown */,
+				OBJ_8 /* TMLXMLToMarkdown */,
 				OBJ_11 /* xmltoredcarpet */,
 			);
 			name = Sources;
 			sourceTree = SOURCE_ROOT;
 		};
-		OBJ_8 /* XMLToMarkdown */ = {
+		OBJ_8 /* TMLXMLToMarkdown */ = {
 			isa = PBXGroup;
 			children = (
 				OBJ_9 /* XMLDeclaration.swift */,
 				OBJ_10 /* XMLToMarkdown.swift */,
 			);
-			name = XMLToMarkdown;
-			path = Sources/XMLToMarkdown;
+			name = TMLXMLToMarkdown;
+			path = Sources/TMLXMLToMarkdown;
 			sourceTree = SOURCE_ROOT;
 		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
-		OBJ_21 /* XMLToMarkdown */ = {
+		OBJ_21 /* TMLXMLToMarkdown */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_22 /* Build configuration list for PBXNativeTarget "XMLToMarkdown" */;
+			buildConfigurationList = OBJ_22 /* Build configuration list for PBXNativeTarget "TMLXMLToMarkdown" */;
 			buildPhases = (
 				OBJ_25 /* Sources */,
 				OBJ_28 /* Frameworks */,
@@ -153,9 +153,9 @@
 			);
 			dependencies = (
 			);
-			name = XMLToMarkdown;
-			productName = XMLToMarkdown;
-			productReference = OBJ_18 /* XMLToMarkdown.framework */;
+			name = TMLXMLToMarkdown;
+			productName = TMLXMLToMarkdown;
+			productReference = OBJ_18 /* TMLXMLToMarkdown.framework */;
 			productType = "com.apple.product-type.framework";
 		};
 		OBJ_29 /* xmltoredcarpet */ = {
@@ -175,9 +175,9 @@
 			productReference = OBJ_19 /* xmltoredcarpet */;
 			productType = "com.apple.product-type.tool";
 		};
-		OBJ_38 /* XMLToMarkdownTests */ = {
+		OBJ_38 /* TMLXMLToMarkdownTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = OBJ_39 /* Build configuration list for PBXNativeTarget "XMLToMarkdownTests" */;
+			buildConfigurationList = OBJ_39 /* Build configuration list for PBXNativeTarget "TMLXMLToMarkdownTests" */;
 			buildPhases = (
 				OBJ_42 /* Sources */,
 				OBJ_45 /* Frameworks */,
@@ -187,9 +187,9 @@
 			dependencies = (
 				OBJ_47 /* PBXTargetDependency */,
 			);
-			name = XMLToMarkdownTests;
-			productName = XMLToMarkdownTests;
-			productReference = OBJ_20 /* XMLToMarkdownTests.xctest */;
+			name = TMLXMLToMarkdownTests;
+			productName = TMLXMLToMarkdownTests;
+			productReference = OBJ_20 /* TMLXMLToMarkdownTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
@@ -200,7 +200,7 @@
 			attributes = {
 				LastUpgradeCheck = 9999;
 			};
-			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "XMLToMarkdown" */;
+			buildConfigurationList = OBJ_2 /* Build configuration list for PBXProject "TMLXMLToMarkdown" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -212,9 +212,9 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				OBJ_21 /* XMLToMarkdown */,
+				OBJ_21 /* TMLXMLToMarkdown */,
 				OBJ_29 /* xmltoredcarpet */,
-				OBJ_38 /* XMLToMarkdownTests */,
+				OBJ_38 /* TMLXMLToMarkdownTests */,
 			);
 		};
 /* End PBXProject section */
@@ -251,13 +251,13 @@
 /* Begin PBXTargetDependency section */
 		OBJ_37 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_21 /* XMLToMarkdown */;
-			targetProxy = 02961C481EA7C3030074FB0E /* PBXContainerItemProxy */;
+			target = OBJ_21 /* TMLXMLToMarkdown */;
+			targetProxy = 0256C2281EA7C794004B8743 /* PBXContainerItemProxy */;
 		};
 		OBJ_47 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = OBJ_21 /* XMLToMarkdown */;
-			targetProxy = 02961C491EA7C3030074FB0E /* PBXContainerItemProxy */;
+			target = OBJ_21 /* TMLXMLToMarkdown */;
+			targetProxy = 0256C2291EA7C794004B8743 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -271,15 +271,15 @@
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = XMLToMarkdown.xcodeproj/XMLToMarkdown_Info.plist;
+				INFOPLIST_FILE = TMLXMLToMarkdown.xcodeproj/TMLXMLToMarkdown_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = XMLToMarkdown;
+				PRODUCT_BUNDLE_IDENTIFIER = TMLXMLToMarkdown;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				TARGET_NAME = XMLToMarkdown;
+				TARGET_NAME = TMLXMLToMarkdown;
 			};
 			name = Debug;
 		};
@@ -292,15 +292,15 @@
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = XMLToMarkdown.xcodeproj/XMLToMarkdown_Info.plist;
+				INFOPLIST_FILE = TMLXMLToMarkdown.xcodeproj/TMLXMLToMarkdown_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				PRODUCT_BUNDLE_IDENTIFIER = XMLToMarkdown;
+				PRODUCT_BUNDLE_IDENTIFIER = TMLXMLToMarkdown;
 				PRODUCT_MODULE_NAME = "$(TARGET_NAME:c99extidentifier)";
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
-				TARGET_NAME = XMLToMarkdown;
+				TARGET_NAME = TMLXMLToMarkdown;
 			};
 			name = Release;
 		};
@@ -335,7 +335,7 @@
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = XMLToMarkdown.xcodeproj/xmltoredcarpet_Info.plist;
+				INFOPLIST_FILE = TMLXMLToMarkdown.xcodeproj/xmltoredcarpet_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
@@ -353,7 +353,7 @@
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = XMLToMarkdown.xcodeproj/xmltoredcarpet_Info.plist;
+				INFOPLIST_FILE = TMLXMLToMarkdown.xcodeproj/xmltoredcarpet_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(TOOLCHAIN_DIR)/usr/lib/swift/macosx @executable_path";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
@@ -393,11 +393,11 @@
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = XMLToMarkdown.xcodeproj/XMLToMarkdownTests_Info.plist;
+				INFOPLIST_FILE = TMLXMLToMarkdown.xcodeproj/TMLXMLToMarkdownTests_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				TARGET_NAME = XMLToMarkdownTests;
+				TARGET_NAME = TMLXMLToMarkdownTests;
 			};
 			name = Debug;
 		};
@@ -410,18 +410,18 @@
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
 				);
 				HEADER_SEARCH_PATHS = "$(inherited)";
-				INFOPLIST_FILE = XMLToMarkdown.xcodeproj/XMLToMarkdownTests_Info.plist;
+				INFOPLIST_FILE = TMLXMLToMarkdown.xcodeproj/TMLXMLToMarkdownTests_Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "@loader_path/../Frameworks @loader_path/Frameworks";
 				OTHER_LDFLAGS = "$(inherited)";
 				OTHER_SWIFT_FLAGS = "$(inherited)";
-				TARGET_NAME = XMLToMarkdownTests;
+				TARGET_NAME = TMLXMLToMarkdownTests;
 			};
 			name = Release;
 		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		OBJ_2 /* Build configuration list for PBXProject "XMLToMarkdown" */ = {
+		OBJ_2 /* Build configuration list for PBXProject "TMLXMLToMarkdown" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_3 /* Debug */,
@@ -430,7 +430,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_22 /* Build configuration list for PBXNativeTarget "XMLToMarkdown" */ = {
+		OBJ_22 /* Build configuration list for PBXNativeTarget "TMLXMLToMarkdown" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_23 /* Debug */,
@@ -448,7 +448,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
 		};
-		OBJ_39 /* Build configuration list for PBXNativeTarget "XMLToMarkdownTests" */ = {
+		OBJ_39 /* Build configuration list for PBXNativeTarget "TMLXMLToMarkdownTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				OBJ_40 /* Debug */,

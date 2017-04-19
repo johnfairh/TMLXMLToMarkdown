@@ -6,7 +6,7 @@
 //
 
 import Foundation
-import XMLToMarkdown
+import TMLXMLToMarkdown
 
 //
 // CLI driver

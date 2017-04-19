@@ -6,7 +6,7 @@
 //
 
 import XCTest
-@testable import XMLToMarkdown
+@testable import TMLXMLToMarkdown
 
 // Very quick + dirty.  Emphasis is on pulling out the xml pieces not formatting markdown.
 

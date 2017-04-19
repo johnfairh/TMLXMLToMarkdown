@@ -6,7 +6,7 @@
 //
 
 import XCTest
-import XMLToMarkdown
+import TMLXMLToMarkdown
 
 class XMLToMarkdownTests: XCTestCase {
 
