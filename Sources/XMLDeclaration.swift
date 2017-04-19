@@ -2,7 +2,7 @@
 //  XMLDeclaration.swift
 //  XMLToMarkdown
 //
-//  Distributed under the ISC license, see LICENSE.
+//  Distributed under the MIT license, see LICENSE.
 //
 
 import Foundation
