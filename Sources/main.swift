@@ -11,7 +11,9 @@ import Foundation
 // CLI driver
 //
 
-let xmlToMarkdown = XMLToMarkdown()
+let xmlToMarkdown = XMLToMarkdown() { str in
+    print("ERROR: \(str)")
+}
 
 func doParse(xml: String) {
     xmlToMarkdown.startMarkdown()

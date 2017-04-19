@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		02D0527B1EA533F500585F3C /* XMLDeclaration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D0527A1EA533F500585F3C /* XMLDeclaration.swift */; };
 		02D0527C1EA552EF00585F3C /* XMLDeclaration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D0527A1EA533F500585F3C /* XMLDeclaration.swift */; };
+		02D0527E1EA774F300585F3C /* XMLDeclarationTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D0527D1EA774F300585F3C /* XMLDeclarationTests.swift */; };
 		02D9E3E01E9E216D00689CC6 /* main.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D9E3DF1E9E216D00689CC6 /* main.swift */; };
 		02D9E3E71E9E219A00689CC6 /* XMLToMarkdown.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D9E3E61E9E219A00689CC6 /* XMLToMarkdown.swift */; };
 		02D9E3EF1E9E21BF00689CC6 /* XMLToMarkdownTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 02D9E3EE1E9E21BF00689CC6 /* XMLToMarkdownTests.swift */; };
@@ -29,6 +30,7 @@
 
 /* Begin PBXFileReference section */
 		02D0527A1EA533F500585F3C /* XMLDeclaration.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLDeclaration.swift; sourceTree = "<group>"; };
+		02D0527D1EA774F300585F3C /* XMLDeclarationTests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLDeclarationTests.swift; sourceTree = "<group>"; };
 		02D9E3DC1E9E216D00689CC6 /* XMLToMarkdown */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = XMLToMarkdown; sourceTree = BUILT_PRODUCTS_DIR; };
 		02D9E3DF1E9E216D00689CC6 /* main.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = main.swift; sourceTree = "<group>"; };
 		02D9E3E61E9E219A00689CC6 /* XMLToMarkdown.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = XMLToMarkdown.swift; sourceTree = "<group>"; };
@@ -87,6 +89,7 @@
 			isa = PBXGroup;
 			children = (
 				02D9E3EE1E9E21BF00689CC6 /* XMLToMarkdownTests.swift */,
+				02D0527D1EA774F300585F3C /* XMLDeclarationTests.swift */,
 				02D9E3F01E9E21BF00689CC6 /* Info.plist */,
 			);
 			name = XMLToMarkdownTests;
@@ -197,6 +200,7 @@
 			files = (
 				02D9E3EF1E9E21BF00689CC6 /* XMLToMarkdownTests.swift in Sources */,
 				02D0527C1EA552EF00585F3C /* XMLDeclaration.swift in Sources */,
+				02D0527E1EA774F300585F3C /* XMLDeclarationTests.swift in Sources */,
 				02D9E3F41E9E21C500689CC6 /* XMLToMarkdown.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

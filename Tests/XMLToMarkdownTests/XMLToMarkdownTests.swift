@@ -119,6 +119,14 @@ class XMLToMarkdownTests: XCTestCase {
             "\(text1)\(html1)\(text2)\(html2)")
     }
 
+    func testLinebreak() {
+        let text1 = "Before"
+        let text2 = "After"
+
+        issueTest("<Para>\(text1)<rawHTML><![CDATA[<br/>]]></rawHTML>\(text2)</Para>",
+                  "\(text1)<br/>\(text2)")
+    }
+
     func testBlockHTML() {
         let para1 = "Normal text"
         let html  = "<div>Unusual area</div>"

@@ -133,7 +133,7 @@ final class XMLDeclarationExtracter: XMLToMarkdownClient {
                          attributes: [String : String],
                          parser: XMLToMarkdown) -> XMLToMarkdown.ElementDone? {
 
-        guard name != XMLDeclarationBuilder.Element.declaration.rawValue else {
+        guard name == XMLDeclarationBuilder.Element.declaration.rawValue else {
             return nil
         }
 
